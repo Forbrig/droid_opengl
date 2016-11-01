@@ -28,19 +28,20 @@ void Desenha(void) {
 	
 	const double time = glutGet(GLUT_ELAPSED_TIME) / 10.0;
 	
-	//glRotatef(2, 0, 1, 0);
+	glRotatef(2, 0, 1, 0);
 	glPushMatrix();
-		glTranslatef(-4, 0, 0);
+		glTranslatef(0, 0, 0);
+		glScalef(2, 2, 2);
 		capisula();
 	glPopMatrix();
 
 	glPushMatrix();
-		glTranslatef(0, 0, 0);
+		glTranslatef(-6, 0, 0);
 		capisula();
 	glPopMatrix();
 		
 	glPushMatrix();
-		glTranslatef(4, 0, 0);
+		glTranslatef(6, 0, 0);
 		capisula();
 	glPopMatrix();
 	
@@ -88,6 +89,8 @@ void Inicializa(void) {
 	glEnable(GL_COLOR_MATERIAL);
 	//Habilita o uso de ilumina��o
 	glEnable(GL_LIGHTING);
+	
+	glEnable(GL_NORMALIZE);
 	// Habilita a luz de n�mero 0
 	glEnable(GL_LIGHT1);
 	// Habilita o depth-buffering
