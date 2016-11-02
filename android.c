@@ -1,15 +1,47 @@
 //gcc android.c -o android -lglut -lGL -lGLU
 
 #include <stdio.h>
+#include <math.h>
 #include <GL/glut.h>
 
 GLfloat angle, fAspect;
 	
-	
+
+/*
+	scalex - scaling of sphere around x-axis
+	scaley - scaling of sphere around y-axis
+	r - radius of sphere
+*/
+
+/*
+void drawHalfSphere(int scaley, int scalex, GLfloat r) {
+   int i, j;
+   GLfloat v[scalex*scaley][3];
+ 
+   for (i=0; i<scalex; ++i) {
+     for (j=0; j<scaley; ++j) {
+       v[i*scaley+j][0]=r*cos(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
+       v[i*scaley+j][1]=r*sin(i*M_PI/(2*scalex));
+       v[i*scaley+j][2]=r*sin(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
+     }
+   }
+ 
+   glBegin(GL_QUADS);
+     for (i=0; i<scalex-1; ++i) {
+       for (j=0; j<scaley; ++j) {
+         glVertex3fv(v[i*scaley+j]);
+         glVertex3fv(v[i*scaley+(j+1)%scaley]);
+         glVertex3fv(v[(i+1)*scaley+(j+1)%scaley]);
+         glVertex3fv(v[(i+1)*scaley+j]);
+       }
+     }
+   glEnd();
+ }
+*/	
 
 void capisula (void) {
-	
 	GLUquadric* quad = gluNewQuadric(); //tipo primitivo pra desenhar quadrics
+
 
 	glPushMatrix();
 		gluSphere(quad, 2, 64, 64);
@@ -28,20 +60,56 @@ void Desenha(void) {
 	
 	const double time = glutGet(GLUT_ELAPSED_TIME) / 10.0;
 	
+	GLUquadric* quad = gluNewQuadric(); //tipo primitivo pra desenhar quadrics
+
 	glRotatef(2, 0, 1, 0);
+
+	/*
 	glPushMatrix();
-		glTranslatef(0, 0, 0);
-		glScalef(2, 2, 2);
-		capisula();
+		drawHalfSphere(3, 3, 3);
+	glPopMatrix();
+	*/
+	
+	
+	//desenhar o torso na mão pra nao perder a beleza
+	
+	glPushMatrix();
+		glScalef(3, 3, 3);
+		
+		gluDisk(quad,  0,  2,  64,  64); //fechando o torso
+		//tronco	
+		glPushMatrix();	
+			glTranslatef(0, 0, -5);	// coloca o tronco pra z -5	
+			glColor3f(0.0f, 0.9f, 0.0f);
+			gluCylinder(quad, 2, 2, 5, 64, 64);
+			glPushMatrix(); //bundinha
+				glScalef(1, 1, 0.4);
+				gluSphere(quad, 2, 64, 64);
+			glPopMatrix();		
+		glPopMatrix();
 	glPopMatrix();
 
+	//braco direito
 	glPushMatrix();
-		glTranslatef(-6, 0, 0);
+		glTranslatef(-9, 0, 0);
 		capisula();
 	glPopMatrix();
 		
+	//braco esquerdo	
 	glPushMatrix();
-		glTranslatef(6, 0, 0);
+		glTranslatef(9, 0, 0);
+		capisula();
+	glPopMatrix();
+	
+	//perna direita
+	glPushMatrix();
+		glTranslatef(3, 0, -15);
+		capisula();
+	glPopMatrix();
+	
+	//perna esquerda
+	glPushMatrix();
+		glTranslatef(-3, 0, -15);
 		capisula();
 	glPopMatrix();
 	
@@ -116,7 +184,7 @@ void EspecificaParametrosVisualizacao(void) {
 
 	// Especifica posi��o do observador e do alvo
 	//gluLookAt(0, 80, 200, 0, 0, 0, 0, 1, 0);
-	gluLookAt(0, 5, 20, 0, 0, 0, 0, 1, 0);
+	gluLookAt(0, 100, 0, 0, 0, 0, 0, 0, 1);
 }
 
 // Fun��o callback chamada quando o tamanho da janela � alterado
