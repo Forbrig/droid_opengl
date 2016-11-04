@@ -5,39 +5,82 @@
 #include <GL/glut.h>
 
 GLfloat angle, fAspect;
-	
 
-/*
-	scalex - scaling of sphere around x-axis
-	scaley - scaling of sphere around y-axis
-	r - radius of sphere
-*/
+GLdouble p[3] = { 0,0,0 };
+const double pi = 3.1415926;
 
-/*
-void drawHalfSphere(int scaley, int scalex, GLfloat r) {
-   int i, j;
-   GLfloat v[scalex*scaley][3];
- 
-   for (i=0; i<scalex; ++i) {
-     for (j=0; j<scaley; ++j) {
-       v[i*scaley+j][0]=r*cos(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
-       v[i*scaley+j][1]=r*sin(i*M_PI/(2*scalex));
-       v[i*scaley+j][2]=r*sin(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
-     }
-   }
- 
-   glBegin(GL_QUADS);
-     for (i=0; i<scalex-1; ++i) {
-       for (j=0; j<scaley; ++j) {
-         glVertex3fv(v[i*scaley+j]);
-         glVertex3fv(v[i*scaley+(j+1)%scaley]);
-         glVertex3fv(v[(i+1)*scaley+(j+1)%scaley]);
-         glVertex3fv(v[(i+1)*scaley+j]);
-       }
-     }
-   glEnd();
- }
-*/	
+// Fun??o Esfera: aproxima??o usando quadrilateros
+// E as formulas:
+// x(theta,phi) = r seno(phi) coseno(theta)
+// y(theta,phi) = r seno(phi) seno(theta)
+// z(theta,phi) = r coseno(phi)
+void esfera(GLdouble *centro, GLdouble radius, GLfloat num) {
+	GLdouble c, c2, x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4;
+	GLdouble phi, theta, phi1, theta1, phi2, theta2;
+	GLdouble senphi1, cosphi1, senphi2, cosphi2,
+	         sentheta1, costheta1, sentheta2, costheta2,
+	         passo;
+
+    GLfloat cor[5][3] = { {0.5, 0.15, 0.8}, {1,0,0}, {1,0.75, 0.15}, {0.3, 1, 0.6}, {0.15,0.65,0.3}};
+
+	glVertex3d(centro[0], centro[1] + radius, centro[2]);
+
+//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	c = pi / 180;
+	passo = 180 / num * c;
+	glBegin(GL_TRIANGLES);
+	phi1 = 0;
+	senphi1 = sin(phi1);
+	cosphi1 = cos(phi1);
+	int i,j,k=0;
+	for (i=0; i < num /2; i++) {
+		phi2 = phi1 + passo;
+		senphi2 = sin(phi2);
+		cosphi2 = cos(phi2);
+		theta1 = 0;
+		sentheta1 = sin(theta1);
+		costheta1 = cos(theta1);
+		for (j=0; j < 2 * num; j++) {
+			theta2 = theta1 + passo;
+			sentheta2 = sin(theta2);
+			costheta2 = cos(theta2);
+			x1 = centro[0] + radius * senphi1 * costheta1;
+			y1 = centro[1] + radius * senphi1 * sentheta1;
+			z1 = centro[2] + radius * cosphi1;
+			glNormal3d(x1, y1, z1);
+			glVertex3d(x1, y1, z1);
+			x2 = centro[0] + radius * senphi2 * costheta1;
+			y2 = centro[1] + radius * senphi2 * sentheta1;
+			z2 = centro[2] + radius * cosphi2;
+			glNormal3d(x2, y2, z2);
+			glVertex3d(x2, y2, z2);
+			x3 = centro[0] + radius * senphi2 * costheta2;
+			y3 = centro[1] + radius * senphi2 * sentheta2;
+			z3 = centro[2] + radius * cosphi2;
+			glNormal3d(x3, y3, z3);
+			glVertex3d(x3, y3, z3);
+			
+			glNormal3d(x1, y1, z1);
+			glVertex3d(x1, y1, z1);
+			
+			glNormal3d(x3, y3, z3);
+			glVertex3d(x3, y3, z3);
+			x4 = centro[0] + radius * senphi1 * costheta2;
+			y4 = centro[1] + radius * senphi1 * sentheta2;
+			z4 = centro[2] + radius * cosphi1;
+			glNormal3d(x4, y4, z4);
+			glVertex3d(x4, y4, z4);
+			theta1 = theta2;
+			sentheta1 = sentheta2;
+			costheta1 = costheta2;
+		}
+		phi1 = phi2;
+		senphi1 = senphi2;
+		cosphi1 = cosphi2;
+	}
+	glEnd();
+}
+
 
 void capisula (void) {
 	GLUquadric* quad = gluNewQuadric(); //tipo primitivo pra desenhar quadrics
@@ -62,57 +105,101 @@ void Desenha(void) {
 	
 	GLUquadric* quad = gluNewQuadric(); //tipo primitivo pra desenhar quadrics
 
-	glRotatef(2, 0, 1, 0);
+	glRotatef(2, 1, 0, 0);
 
-	/*
 	glPushMatrix();
-		drawHalfSphere(3, 3, 3);
-	glPopMatrix();
-	*/
-	
-	
-	//desenhar o torso na mão pra nao perder a beleza
-	
-	glPushMatrix();
-		glScalef(3, 3, 3);
-		
-		gluDisk(quad,  0,  2,  64,  64); //fechando o torso
-		//tronco	
-		glPushMatrix();	
-			glTranslatef(0, 0, -5);	// coloca o tronco pra z -5	
+		glPushMatrix();
+			glTranslatef(0, 0, 0.8);
+			
+			//olho 1
+			glPushMatrix();
+				glColor3f(0.0f, 0.0f, 0.9f);
+				glRotatef(90, 0, 1, 0);
+				glTranslatef(-4, 2, -4);
+				glutSolidSphere(0.5, 25, 25);
+			glPopMatrix();
+			
+			//olho 1
+			glPushMatrix();
+				glColor3f(0.0f, 0.0f, 0.9f);
+				glRotatef(90, 0, 1, 0);
+				glTranslatef(-3, 3.5, 4);
+				glutSolidSphere(0.5, 25, 25);
+			glPopMatrix();
+			
+			
+			
 			glColor3f(0.0f, 0.9f, 0.0f);
-			gluCylinder(quad, 2, 2, 5, 64, 64);
-			glPushMatrix(); //bundinha
-				glScalef(1, 1, 0.4);
-				gluSphere(quad, 2, 64, 64);
-			glPopMatrix();		
+			//Antena 1
+			glPushMatrix();
+				glRotatef(45, 0, 1, 0);
+				glTranslatef(1	, 0, 6 + (7*0.4));
+				glScalef(0.1, 0.1, 0.4);
+				capisula();
+			glPopMatrix();
+			
+			//Antena 2
+			glPushMatrix();
+				glRotatef(-45, 0, 1, 0);
+				glTranslatef(-1, 0, 6 + (7*0.4));
+				glScalef(0.1, 0.1, 0.4);
+				capisula();
+			glPopMatrix();
+			
+			//cabeca	
+			glPushMatrix();
+				glPushMatrix();
+					glRotatef(180, 0, 1, 0);
+					gluDisk(quad,  0,  6,  64,  64);
+				glPopMatrix();
+				
+				esfera(p, 6, 64);
+			glPopMatrix();
 		glPopMatrix();
-	glPopMatrix();
-
-	//braco direito
-	glPushMatrix();
-		glTranslatef(-9, 0, 0);
-		capisula();
-	glPopMatrix();
 		
-	//braco esquerdo	
-	glPushMatrix();
-		glTranslatef(9, 0, 0);
-		capisula();
-	glPopMatrix();
+		
+		//desenhar o torso na mão pra nao perder a beleza
+		glPushMatrix();
+			glScalef(3, 3, 3);
+			
+			gluDisk(quad,  0,  2,  64,  64); //fechando o torso
+			//tronco	
+			glPushMatrix();	
+				glTranslatef(0, 0, -5);	// coloca o tronco pra z -5	
+				glColor3f(0.0f, 0.9f, 0.0f);
+				gluCylinder(quad, 2, 2, 5, 64, 64);
+				glPushMatrix(); //bundinha
+					glScalef(1, 1, 0.4);
+					gluSphere(quad, 2, 64, 64);
+				glPopMatrix();		
+			glPopMatrix();
+		glPopMatrix();
+
+		//braco direito
+		glPushMatrix();
+			glTranslatef(-9, 0, -2);
+			capisula();
+		glPopMatrix();
+			
+		//braco esquerdo	
+		glPushMatrix();
+			glTranslatef(9, 0, -2);
+			capisula();
+		glPopMatrix();
+		
+		//perna direita
+		glPushMatrix();
+			glTranslatef(3, 0, -15);
+			capisula();
+		glPopMatrix();
+		
+		//perna esquerda
+		glPushMatrix();
+			glTranslatef(-3, 0, -15);
+			capisula();
+		glPopMatrix();
 	
-	//perna direita
-	glPushMatrix();
-		glTranslatef(3, 0, -15);
-		capisula();
 	glPopMatrix();
-	
-	//perna esquerda
-	glPushMatrix();
-		glTranslatef(-3, 0, -15);
-		capisula();
-	glPopMatrix();
-	
 	
 	glutSwapBuffers();
 }
