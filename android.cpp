@@ -1,4 +1,4 @@
-//gcc android.c -o android -lglut -lGL -lGLU
+//g++ android.cpp -o android -lglut -lGL -lGLU
 
 #include <stdio.h>
 #include <math.h>
